@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# VSCode files
+.vscode/
+vscode/
