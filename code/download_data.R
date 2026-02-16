@@ -54,6 +54,12 @@ rse_gene_SRP130963 <- expand_sra_attributes(rse_gene_SRP130963)
 # --snip-- (rse_gene_SRP130963 display)
 # colData names(181): rail_id external_id ... sra_attribute.source_name sra_attribute.tissue
 # This funtion has added for this expermient 4 more columns with information
- 
+
+# The SummarizedExperiment package has a save method to export our RSE object and use it in others scripts allowing
+# a segmented workflow, to fulfill the templete of the LIBD, the raw and processed data will be saved
+# (change dir if necessary)
+saveRDS(create_rse(project_info), file = "raw-data/raw_rse_gene_SRP130963") # Raw RSE
+
+saveRDS(rse_gene_SRP130963, file = "processed-data/rse_gene_SRP130963") # Processed RSE
 
 
