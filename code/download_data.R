@@ -38,3 +38,15 @@ rse_gene_SRP130963
 #
 # This object has 55421 genes, and the 45 samples 
 ######################
+
+# In the recount3 documentation is said that:
+# "recount3 provides processed RNA-seq data for human and mouse in file formats similar to recount2, 
+#  which at its core is based on coverage bigWig files and exon-exon junction counts"
+#
+# To work downstream the pipeline we need to transform the raw data to the expresion matrices 
+# So we use the funtion 'compute_read_counts' of recount3 and add those like an assay of name "counts" to our RSE
+assay(rse_gene_SRP130963, "counts") <- compute_read_counts(rse_gene_SRP130963)
+
+
+
+
