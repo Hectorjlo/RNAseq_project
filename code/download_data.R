@@ -47,6 +47,13 @@ rse_gene_SRP130963
 # So we use the funtion 'compute_read_counts' of recount3 and add those like an assay of name "counts" to our RSE
 assay(rse_gene_SRP130963, "counts") <- compute_read_counts(rse_gene_SRP130963)
 
-
+# From the bioconductor package "recount3":
+# For studies from SRA, we can further extract the SRA attributes using expand_sra_attributes()
+# We can extract more information of the experiments with that tool
+rse_gene_SRP130963 <- expand_sra_attributes(rse_gene_SRP130963)
+# --snip-- (rse_gene_SRP130963 display)
+# colData names(181): rail_id external_id ... sra_attribute.source_name sra_attribute.tissue
+# This funtion has added for this expermient 4 more columns with information
+ 
 
 
