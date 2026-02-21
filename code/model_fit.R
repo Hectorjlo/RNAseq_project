@@ -79,3 +79,31 @@ rse_gene_SRP130963$sra_attribute.tissue <- factor(tolower(rse_gene_SRP130963$sra
 #     and oligodendrocytes for disease modeling or regenerative research.
 
 # In this way the RNA expressions of this tissues will be compared
+
+
+# Before the analysis, it's important to perform a quality check(qc) of the data 
+
+# One qc is the proportion of reads assigned to genes (via featureCounts) by all reads
+# The closer to one means that the reads were high quality and almost all reads were 
+# assigned to genes, this method is called gene prop
+
+# To accomplish the qc we'll add a column to our RSE
+rse_gene_SRP130963$assigned_gene_prop <- rse_gene_SRP130963$recount_qc.gene_fc_count_all.assigned / rse_gene_SRP130963$recount_qc.gene_fc_count_all.total
+# Displaying the summary
+# > summary(rse_gene_SRP130963$assigned_gene_prop)
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#  0.5893  0.6684  0.6858  0.6827  0.7003  0.7220
+
+# The gene prop of the data is well agrupated but as a double-check
+# We can display a boxplot
+# > boxplot(rse_gene_SRP130963$assigned_gene_prop)
+# The box plot shows a low outlier, and it the one with the lowest gene prop (.5893)
+# But it's not essencial to delete it, gene_prop tell us that more than half of the total
+# reads are assigned to genes. If we'd found a score of .3 or less those would need to be 
+# deleted
+
+# We can go even further and analyse between tissues with:
+# > with(colData(rse_gene_SRP130963), tapply(assigned_gene_prop, sra_attribute.tissue, summary))
+# (output not display for simplicity)
+# But all individual summaries are as the global one of gene prop
+
