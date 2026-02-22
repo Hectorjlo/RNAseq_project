@@ -102,8 +102,49 @@ rse_gene_SRP130963$assigned_gene_prop <- rse_gene_SRP130963$recount_qc.gene_fc_c
 # reads are assigned to genes. If we'd found a score of .3 or less those would need to be 
 # deleted
 
-# We can go even further and analyse between tissues with:
+# We can go even further and analyze between tissues with:
 # > with(colData(rse_gene_SRP130963), tapply(assigned_gene_prop, sra_attribute.tissue, summary))
 # (output not display for simplicity)
 # But all individual summaries are as the global one of gene prop
+
+# Let's continue at the qc, this time let's analyze the samples for it's avarage expression
+# If the avarage expression of a sample is less than .1 would be dropped
+# It is more robust to perform the qc that filters by expression using a well worked library
+# for example the library edgeR
+# The code will use the edgeR library if it's not installed would need to be installed with
+# install.packages("edgeR")
+
+# Load the library edgeR
+library(edgeR)
+
+# For the filter, it's needed to create a DGE object with the counts of the assay
+dge <- DGEList(counts = assay(rse_gene_SRP130963, "counts"))
+
+# Define the experimental group, were the filter would be applied
+experimental_group <- rse_gene_SRP130963$sra_attribute.tissue
+
+# Filter out with edgeR
+# edgeR uses an internal logic to discriminate if the expression is statistical important
+# the funtion returns a logic vector to decide for each gene
+filter <- filterByExpr(dge, group = experimental_group)
+# Take a look to the table of filter
+# > table(filter)
+# FALSE  TRUE 
+# 33164 22257
+# The funtion took 22257 genes as TRUE, this means that those genes had the enough expression
+# to be considered in further analysis
+
+# Apply the filter to the RSE object
+# Overwrite the RSE but save the total genes for later comparation
+total_genes <- nrow(rse_gene_SRP130963)
+rse_gene_SRP130963 <- rse_gene_SRP130963[filter, ]
+
+# Check the new dimensions (genes x samples) that were left after the screening
+# > dim(rse_gene_SRP130963)
+# [1] 22257    45
+
+# Percentage of genes that were retain after filtration
+print("Percentage of genes that were retain after filtration")
+round((nrow(rse_gene_SRP130963) / total_genes) * 100, 2)
+
 
