@@ -147,4 +147,62 @@ rse_gene_SRP130963 <- rse_gene_SRP130963[filter, ]
 print("Percentage of genes that were retain after filtration")
 round((nrow(rse_gene_SRP130963) / total_genes) * 100, 2)
 
+# Note: It is importat to apply a normalization of the data, is needed because the raw
+# counts can be influenciated technical bias as library size or the detp of the sequencing
+# once the normalization is done the samples can be compared.
 
+# As the filter an DGEList object is needed
+dge <- DGEList(
+  counts = assay(rse_gene_SRP130963, "counts"),
+  genes = rowData(rse_gene_SRP130963),
+  samples = colData(rse_gene_SRP130963)
+)
+# Apply the normalization with the funtion of edgeR funtion calcNormFactors
+dge <- calcNormFactors(dge)
+
+# - - Design of the model matrix - - #
+# Here it's defined the stadistical model matrix that would be used in further analysis
+# We defined the covariables of a linear model, here only one would be taken as the data
+# has no further information and also the gene prop
+model_matrix <-  model.matrix(~ sra_attribute.tissue + assigned_gene_prop, data = as.data.frame(colData(rse_gene_SRP130963)))
+
+# Then to perform a data exploration, we can use the library of variancePartition and limma to create lineal
+# model, and also check that our variables choosen were the ones that explain the majority of the variance of 
+# the data, so we load both libraries 
+library(limma)
+library(variancePartition)
+
+# Using a function of the library limma that transform RNA-Seq Data Ready for Linear Modelling
+vGene <- voom(dge, design = model_matrix, plot = FALSE)
+
+# Asigning a formula as the type of tissues found
+formula <- ~ sra_attribute.tissue + assigned_gene_prop
+
+# Then a model is fit to a lineal model that allow to explain the variance given the variable (formula) passed
+# to the function fitExtarctVarPartModel()
+varPart <- fitExtractVarPartModel(vGene, formula, as.data.frame(colData(rse_gene_SRP130963)))
+
+# And then visualize how much of the variance is explain by our variable
+plotVarPart(varPart)
+
+# For is project, the plot shows that only about 25% of our variable can explain all the variance of the data
+# this is an interesting result, given that this set of data only has a variable (tissue) as the main driver of variance
+# the plot show a possible hidden variables that are not considered
+
+# After a deep investigation, tried to find possible causes for the low variance, the conclusion is that the
+# cells themselves are not in states too different from each that the variance is low. This is justified because
+# even tough the option of batch effect was considered there are not varibles that show possible batch effect
+# so the conclusion to this situation is that: All tissues (state) of the samples are in a gradient of differentiation
+# 3 of them in a proccess in early differentiation and 1 in a complete pluripotent state, so the variance is not indicating
+# bad quality, in fact it is not a huge difference of this 4 early develoment tissues but them still show a 
+# separation between them that will allow the next step in the DE.
+
+
+# To keep a separation of the code, the vGene that cointains the data ready for the limma analysis will be exported
+# as the RSE object transformed in this code.
+
+# Save the vGene object
+saveRDS(vGene, file = "processed-data/vGene_DE_ready")
+
+# Save the RSE transformed in this code
+saveRDS(rse_gene_SRP130963, file = "processed-data/rse_gene_SRP130963_DE_ready")
