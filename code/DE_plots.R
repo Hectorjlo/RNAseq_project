@@ -159,5 +159,17 @@ heatmap_expression <- vGene$E[rank(DE_results$adj.P.Val) <= N_GENES, ]
 # Taking the columns that will important information, in this case only tissue 
 # is going to be taken
 
-data_frame <- as.data.frame(colData(rse_gene_SRP130963))[, "sra_attribute.tissue"]
-colnames(data_frame) <- "sra_attribute.tissue"
+data_frame <- as.data.frame(colData(rse_gene_SRP130963))[, "sra_attribute.tissue", drop = FALSE]
+colnames(data_frame) <- "Tissue type"
+
+
+# Display the heatmap
+library(pheatmap)
+pheatmap(
+    heatmap_expression,
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = FALSE,
+    show_colnames = FALSE,
+    annotation_col = data_frame
+)
