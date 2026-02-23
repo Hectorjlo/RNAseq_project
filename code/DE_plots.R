@@ -1,5 +1,6 @@
 # Load the library limma to visualize plots of DE
 library(limma)
+library(SummarizedExperiment)
 
 # Load and save the the RSE object procceded and ready for the DE analysis
 rse_gene_SRP130963_DE_ready <- readRDS(
@@ -159,7 +160,7 @@ heatmap_expression <- vGene$E[rank(DE_results$adj.P.Val) <= N_GENES, ]
 # Taking the columns that will important information, in this case only tissue 
 # is going to be taken
 
-data_frame <- as.data.frame(colData(rse_gene_SRP130963))[, "sra_attribute.tissue", drop = FALSE]
+data_frame <- as.data.frame(colData(rse_gene_SRP130963_DE_ready))[, "sra_attribute.tissue", drop = FALSE]
 colnames(data_frame) <- "Tissue type"
 
 
