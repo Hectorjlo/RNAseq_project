@@ -122,9 +122,11 @@ make_volcano <- function(coef_num, title_label, top_x) {
 }
 
 # Call to the vulcano maker plot
-p1 <- make_volcano(2, "ESCs vs Neural Cells", 4)
-p2 <- make_volcano(3, "ESCs vs Embryoid Bodies", 4)
-p3 <- make_volcano(4, "ESCs vs Epiblast SCs", 4)
+# Top_n definition
+take_top_n <- 4
+p1 <- make_volcano(2, "ESCs vs Neural Cells", take_top_n)
+p2 <- make_volcano(3, "ESCs vs Embryoid Bodies", take_top_n)
+p3 <- make_volcano(4, "ESCs vs Epiblast SCs", take_top_n)
 
 # Join all vulcano plots
 (p1 | p2 | p3) +
@@ -134,3 +136,15 @@ p3 <- make_volcano(4, "ESCs vs Epiblast SCs", 4)
   ) +
   # Uniq for the color tag
   plot_layout(guides = "collect") 
+
+
+top_neural <- topTable(bayes_mod_results, coef = 2, number = take_top_n)
+top_embryoid <- topTable(bayes_mod_results, coef = 3, number = take_top_n)
+top_epiblast <- topTable(bayes_mod_results, coef = 4, number = take_top_n)
+
+# Show top tables
+top_neural
+top_embryoid
+top_epiblast
+
+# DE_results[DE_results$gene_name %in% top_significant_genes, ]
