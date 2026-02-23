@@ -60,3 +60,77 @@ ggplot(DE_results, aes(x = AveExpr, y = logFC, color = significance)) +
   theme_bw() +
   labs(title = "MA Plot", x = "Average Expression", y = "Log Fold Change")
 
+# Load of ggrepel that allow us to have tags not over themselves 
+library(ggrepel)
+# Load the library patchwork to combine in one plot 
+library(patchwork)
+
+# Check coefficients of the bayes model
+# colnames(bayes_mod_results$coefficients)
+# [1] "(Intercept)"                                               
+# [2] "sra_attribute.tissuedifferentiating ESCs into Neural Cells"
+# [3] "sra_attribute.tissueEmbryoid bodies"                       
+# [4] "sra_attribute.tissueEpiblast SCs"                          
+# [5] "assigned_gene_prop"
+
+
+# The intercept is taken as the coefficient 1
+# The tag is need to be the same or mean the same as the coefficent
+comparisons <- list(
+  list(coef = 2, title = "ESCs vs Neural Cells"),
+  list(coef = 3, title = "ESCs vs Embryoid Bodies"),
+  list(coef = 4, title = "ESCs vs Epiblast SCs")
+)
+
+# This funtions takes the coefficient number and the label of the plot
+# It does a vulcano plot with cutoffs to logFC > 1 and pvalue to be at least .05
+make_volcano <- function(coef_num, title_label, top_x) {
+  
+  df <- topTable(bayes_mod_results, coef = coef_num, number = Inf, sort.by = "none")
+  df$gene_name <- DE_results$gene_name  
+  
+  # Define the stadistical cutoff
+  # In this case .05 and logFC > 1 was set
+  df$significant <- df$adj.P.Val < 0.05 & abs(df$logFC) > 1
+  # Complete with NA when the condition is not met
+  df$color_val   <- ifelse(df$significant, -log10(df$adj.P.Val), NA)
+  
+  # Show the most stadistical significant genes 
+  top <- head(df[order(df$adj.P.Val), ], top_x)
+  
+  ggplot(df, aes(x = logFC, y = -log10(P.Value))) +
+    # Non significant points
+    geom_point(data = subset(df, !significant),
+               color = "lightgray", alpha = 0.2, size = 1) +
+    # Significant ponints, form a grandient
+    geom_point(data = subset(df, significant),
+               aes(color = color_val), size = 1.5) +
+    scale_color_gradient(low = "blue", high = "red",
+                         name = "-log10\n(Adj.P)") +
+    # Top tags defined earlier
+    geom_text_repel(data = top,
+                    aes(label = gene_name),
+                    size = 3, fontface = "bold",
+                    box.padding = 0.5) +
+    # Reference lines of the cutoffs
+    geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "darkgrey") +
+    geom_vline(xintercept = c(-1, 1),     linetype = "dashed", color = "darkgrey") +
+    theme_minimal(base_size = 11) +
+    labs(title = title_label,
+         x = "Log2 Fold Change",
+         y = "-log10(P-Value)")
+}
+
+# Call to the vulcano maker plot
+p1 <- make_volcano(2, "ESCs vs Neural Cells", 4)
+p2 <- make_volcano(3, "ESCs vs Embryoid Bodies", 4)
+p3 <- make_volcano(4, "ESCs vs Epiblast SCs", 4)
+
+# Join all vulcano plots
+(p1 | p2 | p3) +
+  plot_annotation(
+    title = "Vulcano Plots: ESCs vs Other Tissues",
+    theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+  ) +
+  # Uniq for the color tag
+  plot_layout(guides = "collect") 
