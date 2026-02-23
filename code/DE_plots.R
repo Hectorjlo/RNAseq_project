@@ -54,14 +54,14 @@ DE_results$significance <- ifelse(DE_results$adj.P.Val < 0.05 & DE_results$logFC
 ifelse(DE_results$adj.P.Val < 0.05 & DE_results$logFC < -1, "Down", "NonSig"))
 
 # Plot of logFC and Avarage log-expression
-variance_plot <- ggplot(DE_results, aes(x = AveExpr, y = logFC, color = significance)) +
+avarage_exp_plot <- ggplot(DE_results, aes(x = AveExpr, y = logFC, color = significance)) +
   geom_point(alpha = 0.5, size = 1) +
   scale_color_manual(values = c("Up" = "red", "Down" = "blue", "NS" = "grey")) +
   geom_hline(yintercept = c(-1, 1), linetype = "dashed") +
   theme_bw() +
   labs(title = "MA Plot", x = "Average Expression", y = "Log Fold Change")
 # Save the plot in a high quality
-ggsave("plots/Variance_plot.png", plot = variance_plot, dpi = 1200, width = 11.25, height = 7.5)
+ggsave("plots/Avarage_exp_plot.png", plot = avarage_exp_plot, dpi = 1200, width = 11.25, height = 7.5)
 
 # Load of ggrepel that allow us to have tags not over themselves 
 library(ggrepel)
