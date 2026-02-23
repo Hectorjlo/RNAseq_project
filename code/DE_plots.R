@@ -54,12 +54,14 @@ DE_results$significance <- ifelse(DE_results$adj.P.Val < 0.05 & DE_results$logFC
 ifelse(DE_results$adj.P.Val < 0.05 & DE_results$logFC < -1, "Down", "NonSig"))
 
 # Plot of logFC and Avarage log-expression
-ggplot(DE_results, aes(x = AveExpr, y = logFC, color = significance)) +
+variance_plot <- ggplot(DE_results, aes(x = AveExpr, y = logFC, color = significance)) +
   geom_point(alpha = 0.5, size = 1) +
   scale_color_manual(values = c("Up" = "red", "Down" = "blue", "NS" = "grey")) +
   geom_hline(yintercept = c(-1, 1), linetype = "dashed") +
   theme_bw() +
   labs(title = "MA Plot", x = "Average Expression", y = "Log Fold Change")
+# Save the plot in a high quality
+ggsave("plots/Variance_plot.png", plot = variance_plot, dpi = 1200, width = 11.25, height = 7.5)
 
 # Load of ggrepel that allow us to have tags not over themselves 
 library(ggrepel)
@@ -130,13 +132,16 @@ p2 <- make_volcano(3, "ESCs vs Embryoid Bodies", take_top_n)
 p3 <- make_volcano(4, "ESCs vs Epiblast SCs", take_top_n)
 
 # Join all vulcano plots
-(p1 | p2 | p3) +
+joined_vulcano <- (p1 | p2 | p3) +
   plot_annotation(
     title = "Vulcano Plots: ESCs vs Other Tissues",
     theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
   ) +
   # Uniq for the color tag
   plot_layout(guides = "collect") 
+# Save the plot in a high quality
+
+ggsave("plots/Vulcanos_plot.png", plot = joined_vulcano, dpi = 1200, width = 11.25, height = 7.5)
 
 
 top_neural <- topTable(bayes_mod_results, coef = 2, number = take_top_n)
@@ -166,20 +171,29 @@ colnames(data_frame) <- "Tissue type"
 
 # Display the heatmap
 library(pheatmap)
-pheatmap(
+heatmap <- pheatmap(
     heatmap_expression,
     cluster_rows = TRUE,
     cluster_cols = TRUE,
     show_rownames = FALSE,
     show_colnames = FALSE,
-    annotation_col = data_frame
+    annotation_col = data_frame,
+    # Save the plot in a high quality
+    filename = "plots/Heatmap_plot.png",
+    width = 20,
+    height = 11.25,
+    fontsize = 18
 )
 
-## To show colors
+
+## To show colors for the next plotMDS
 library(RColorBrewer)
 
 col.group <- data_frame$`Tissue type`
 tissue_colors <- brewer.pal(nlevels(col.group), "Set1")
 col.group <- tissue_colors[as.numeric(col.group)]
 
+# Save the plot in a high quality
+png("plots/MDS_plot.png", width = 11.25, height = 7.5, units = "in", res = 1200)
 plotMDS(vGene$E, labels = data_frame$`Tissue type`, col = col.group)
+dev.off()
