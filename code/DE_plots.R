@@ -173,3 +173,12 @@ pheatmap(
     show_colnames = FALSE,
     annotation_col = data_frame
 )
+
+## To show colors
+library(RColorBrewer)
+
+col.group <- data_frame$`Tissue type`
+tissue_colors <- brewer.pal(nlevels(col.group), "Set1")
+col.group <- tissue_colors[as.numeric(col.group)]
+
+plotMDS(vGene$E, labels = data_frame$`Tissue type`, col = col.group)
