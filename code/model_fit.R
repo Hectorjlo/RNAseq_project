@@ -55,7 +55,7 @@ rse_gene_SRP130963$sra_attribute.tissue <- factor(tolower(rse_gene_SRP130963$sra
 # This is possible bacause the tissues are from different stages of development:
 # (from more pluripotent to more differentiated)
 
-# differentiating embryonic stem cells into embryoid bodies (ESCs): 
+# embryonic stem cells (ESCs): 
 #     Pluripotent stem cells derived from the inner cell mass of a blastocyst. 
 #     They possess the unique ability to self-renew indefinitely and can 
 #     differentiate into all three germ layers: ectoderm, mesoderm, and endoderm.
@@ -79,6 +79,35 @@ rse_gene_SRP130963$sra_attribute.tissue <- factor(tolower(rse_gene_SRP130963$sra
 #     and oligodendrocytes for disease modeling or regenerative research.
 
 # In this way the RNA expressions of this tissues will be compared
+
+# For a better visulization the tissues the names of them were changed to compact names
+# differentiating embryonic stem cells into embryoid bodies as Eembryod bodies
+rse_gene_SRP130963$sra_attribute.tissue <- gsub(
+  "differentiating embryonic stem cells into embryoid bodies",
+  "Embryoid bodies",
+  rse_gene_SRP130963$sra_attribute.tissue
+)
+# differentiating embryonic stem cells into episcs as Epiblast Stem Cells
+rse_gene_SRP130963$sra_attribute.tissue <- gsub(
+  "differentiating embryonic stem cells into episcs",
+  "Epiblast SCs",
+  rse_gene_SRP130963$sra_attribute.tissue
+)
+# differentiating embryonic stem cells into neural cells as differentiating ESCs into Neural Cells
+rse_gene_SRP130963$sra_attribute.tissue <- gsub(
+  "differentiating embryonic stem cells into neural cells",
+  "differentiating ESCs into Neural Cells",
+  rse_gene_SRP130963$sra_attribute.tissue
+)
+# Using ESC as Embryonic Stem Cells 
+rse_gene_SRP130963$sra_attribute.tissue <- gsub(
+  "embryonic stem cells",
+  "ESCs",
+  rse_gene_SRP130963$sra_attribute.tissue
+)
+
+# After the use of gsub the factor needs to be build again
+rse_gene_SRP130963$sra_attribute.tissue <- factor(rse_gene_SRP130963$sra_attribute.tissue)
 
 
 # Before the analysis, it's important to perform a quality check(qc) of the data 
@@ -164,7 +193,11 @@ dge <- calcNormFactors(dge)
 # Here it's defined the stadistical model matrix that would be used in further analysis
 # We defined the covariables of a linear model, here only one would be taken as the data
 # has no further information and also the gene prop
+# The use of relevel is meant to order in a specific way the variables as to define the baseline
+rse_gene_SRP130963$sra_attribute.tissue <- relevel(rse_gene_SRP130963$sra_attribute.tissue, "ESCs", "Embryoid bodies", "Epiblast SCs", "differentiating ESCs into Neural Cells")
 model_matrix <-  model.matrix(~ sra_attribute.tissue + assigned_gene_prop, data = as.data.frame(colData(rse_gene_SRP130963)))
+# Explore the matrix
+colnames(model_matrix)
 
 # Then to perform a data exploration, we can use the library of variancePartition and limma to create lineal
 # model, and also check that our variables choosen were the ones that explain the majority of the variance of 
