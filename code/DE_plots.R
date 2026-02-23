@@ -43,3 +43,20 @@ DE_results <- topTable(
 # low total variance explained by the tissue, but still 3251 were correctly identified
 # to have a DE > .05 between tissue type
 
+# See in plots the results of the bayes moderation
+
+# Load ggplot2
+library(ggplot2)
+
+# Decide by the adjusted P-value the color
+DE_results$significance <- ifelse(DE_results$adj.P.Val < 0.05 & DE_results$logFC > 1, "Up", 
+ifelse(DE_results$adj.P.Val < 0.05 & DE_results$logFC < -1, "Down", "NonSig"))
+
+# Plot of logFC and Avarage log-expression
+ggplot(DE_results, aes(x = AveExpr, y = logFC, color = significance)) +
+  geom_point(alpha = 0.5, size = 1) +
+  scale_color_manual(values = c("Up" = "red", "Down" = "blue", "NS" = "grey")) +
+  geom_hline(yintercept = c(-1, 1), linetype = "dashed") +
+  theme_bw() +
+  labs(title = "MA Plot", x = "Average Expression", y = "Log Fold Change")
+
