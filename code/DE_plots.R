@@ -147,4 +147,17 @@ top_neural
 top_embryoid
 top_epiblast
 
-# DE_results[DE_results$gene_name %in% top_significant_genes, ]
+# - - Heatmaps - - #
+
+# Using the object vGene to extract the normalized data of the limma voom function
+
+# Take the top N genes most differentiated expressed genes and it's values
+N_GENES <- 50
+heatmap_expression <- vGene$E[rank(DE_results$adj.P.Val) <= N_GENES, ]
+
+# Create a table with the information of the samples
+# Taking the columns that will important information, in this case only tissue 
+# is going to be taken
+
+data_frame <- as.data.frame(colData(rse_gene_SRP130963))[, "sra_attribute.tissue"]
+colnames(data_frame) <- "sra_attribute.tissue"
